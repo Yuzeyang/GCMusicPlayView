@@ -18,6 +18,7 @@
 
 @property (nonatomic, strong) UIImageView *musicCover;
 
+
 @end
 
 @implementation ViewController
@@ -34,7 +35,9 @@
 //    [UIScreen mainScreen].bounds
     
     self.musicCover = [[UIImageView alloc] initWithFrame:CGRectMake(0, 20, DeviceWidth, kCoverHeight)];
-    self.musicCover.backgroundColor = [UIColor orangeColor];
+//    self.musicCover.backgroundColor = [UIColor orangeColor];
+    self.musicCover.image = [UIImage imageNamed:@"Maps"];
+    self.musicCover.layer.masksToBounds = YES;
     [self.view addSubview:self.musicCover];
 
     UIButton *aniBtn = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -79,10 +82,19 @@
     [self.musicCover.layer addAnimation:group forKey:nil];
 }
 
+- (void)coverRotated {
+    CABasicAnimation *rotateAni = [CABasicAnimation animationWithKeyPath:@"transform.rotation.z"];
+    rotateAni.toValue = @(M_PI*2);
+    rotateAni.repeatCount = HUGE_VALF;
+    rotateAni.beginTime = 0;
+    rotateAni.duration = 5;
+    [self.musicCover.layer addAnimation:rotateAni forKey:nil];
+}
+
 - (void)animationDidStop:(CAAnimation *)animation finished:(BOOL)flag {
     NSString *ani = [animation valueForKey:@"ani"];
     if ([ani isEqualToString:@"coverAnimation"]) {
-        NSLog(@"coverAnimation");
+        [self coverRotated];
     }
 }
 
