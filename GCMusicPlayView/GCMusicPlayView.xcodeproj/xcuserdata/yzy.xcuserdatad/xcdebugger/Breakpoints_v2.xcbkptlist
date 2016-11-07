@@ -10,11 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "GCMusicPlayView/ViewController.m"
-            timestampString = "500187673.063902"
+            timestampString = "500189047.559477"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "46"
-            endingLineNumber = "46"
+            startingLineNumber = "56"
+            endingLineNumber = "56"
             landmarkName = "-setUp"
             landmarkType = "7">
          </BreakpointContent>

@@ -13,11 +13,17 @@
 #define DeviceHeight CGRectGetHeight([UIScreen mainScreen].bounds)
 
 #define kCoverHeight DeviceHeight*1/3
+#define kPlayBarHeight 50
+
+typedef NS_ENUM(NSUInteger, playBarStatus) {
+    show,
+    hide
+};
 
 @interface ViewController () <CAAnimationDelegate>
 
 @property (nonatomic, strong) UIImageView *musicCover;
-
+@property (nonatomic, strong) UIView *playBar;
 
 @end
 
@@ -32,17 +38,20 @@
 
 - (void)setUp {
     self.view.backgroundColor = [UIColor lightGrayColor];
-//    [UIScreen mainScreen].bounds
     
-    self.musicCover = [[UIImageView alloc] initWithFrame:CGRectMake(0, 20, DeviceWidth, kCoverHeight)];
-//    self.musicCover.backgroundColor = [UIColor orangeColor];
+    self.musicCover = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, DeviceWidth, kCoverHeight)];
     self.musicCover.image = [UIImage imageNamed:@"Maps"];
     self.musicCover.layer.masksToBounds = YES;
     [self.view addSubview:self.musicCover];
+    
+    self.playBar = [[UIView alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(self.musicCover.frame) - kPlayBarHeight, DeviceWidth, kPlayBarHeight)];
+    self.playBar.backgroundColor = [UIColor darkGrayColor];
+    self.playBar.layer.opacity = 0.5;
+    [self.view addSubview:self.playBar];
 
     UIButton *aniBtn = [UIButton buttonWithType:UIButtonTypeCustom];
     [aniBtn setFrame:CGRectMake(20, 300, 30, 30)];
-    [aniBtn addTarget:self action:@selector(coverAnimation) forControlEvents:UIControlEventTouchUpInside];
+    [aniBtn addTarget:self action:@selector(startPlay) forControlEvents:UIControlEventTouchUpInside];
     aniBtn.backgroundColor = [UIColor redColor];
     [self.view addSubview:aniBtn];
 }
@@ -52,10 +61,16 @@
     // Dispose of any resources that can be recreated.
 }
 
+- (void)startPlay {
+    [self coverAnimation];
+    [self playBarOpacityAnimationWithStatus:hide];
+}
+
+#pragma mark - Cover Animation
 - (void)coverAnimation {
     NSLog(@"%s",__func__);
     CABasicAnimation *positionDownAni = [CABasicAnimation animationWithKeyPath:@"position.y"];
-    positionDownAni.toValue = @(self.musicCover.layer.position.y + kCoverHeight - 50);
+    positionDownAni.toValue = @(self.musicCover.layer.position.y + kCoverHeight - 30);
     positionDownAni.beginTime = 0;
     positionDownAni.duration = 0.3;
 
@@ -89,6 +104,14 @@
     rotateAni.beginTime = 0;
     rotateAni.duration = 5;
     [self.musicCover.layer addAnimation:rotateAni forKey:nil];
+}
+
+#pragma mark - Play Bar Aniamtion
+- (void)playBarOpacityAnimationWithStatus:(playBarStatus)status {
+    [UIView animateWithDuration:0.1 animations:^{
+        CGFloat opacity = status == show ? 1.0 : 0.0;
+        self.playBar.layer.opacity = opacity;
+    }];
 }
 
 - (void)animationDidStop:(CAAnimation *)animation finished:(BOOL)flag {
