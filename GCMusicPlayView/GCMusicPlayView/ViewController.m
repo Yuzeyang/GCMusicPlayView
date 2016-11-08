@@ -14,6 +14,8 @@
 
 #define kCoverHeight DeviceHeight*1/3
 #define kPlayBarHeight 50
+#define kMusicTitleFromHeight 25
+#define kMusicTitleToHeight 50
 
 typedef NS_ENUM(NSUInteger, playBarStatus) {
     show,
@@ -24,6 +26,7 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
 
 @property (nonatomic, strong) UIImageView *musicCover;
 @property (nonatomic, strong) UIView *playBar;
+@property (nonatomic, strong) UILabel *musicTitle;
 
 @end
 
@@ -37,7 +40,7 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
 }
 
 - (void)setUp {
-    self.view.backgroundColor = [UIColor lightGrayColor];
+    self.view.backgroundColor = [UIColor colorWithRed:30.0/255.0 green:32.0/255.0 blue:32.0/255.0 alpha:1.0];
     
     self.musicCover = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, DeviceWidth, kCoverHeight)];
     self.musicCover.image = [UIImage imageNamed:@"Maps"];
@@ -45,10 +48,17 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
     [self.view addSubview:self.musicCover];
     
     self.playBar = [[UIView alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(self.musicCover.frame) - kPlayBarHeight, DeviceWidth, kPlayBarHeight)];
-    self.playBar.backgroundColor = [UIColor darkGrayColor];
-    self.playBar.layer.opacity = 0.5;
+    self.playBar.backgroundColor = [[UIColor darkGrayColor] colorWithAlphaComponent:0.5];
     [self.view addSubview:self.playBar];
-
+    
+    self.musicTitle = [[UILabel alloc] initWithFrame:CGRectMake(20, CGRectGetMaxY(self.playBar.frame) - kMusicTitleToHeight, DeviceWidth - 40, kMusicTitleFromHeight)];
+    NSMutableAttributedString *song = [[NSMutableAttributedString alloc] initWithString:@"Maps" attributes:@{NSForegroundColorAttributeName: [UIColor whiteColor]}];
+    NSMutableAttributedString *author = [[NSMutableAttributedString alloc] initWithString:@" - Bruno Mars" attributes:@{NSForegroundColorAttributeName: [UIColor lightGrayColor]}];
+    self.musicTitle.lineBreakMode = NSLineBreakByTruncatingTail;
+    [song appendAttributedString:author];
+    self.musicTitle.attributedText = song;
+    [self.view addSubview:self.musicTitle];
+    
     UIButton *aniBtn = [UIButton buttonWithType:UIButtonTypeCustom];
     [aniBtn setFrame:CGRectMake(20, 300, 30, 30)];
     [aniBtn addTarget:self action:@selector(startPlay) forControlEvents:UIControlEventTouchUpInside];
@@ -64,30 +74,25 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
 - (void)startPlay {
     [self coverAnimation];
     [self playBarOpacityAnimationWithStatus:hide];
+    [self musicTitleAnimation];
 }
 
 #pragma mark - Cover Animation
 - (void)coverAnimation {
-    NSLog(@"%s",__func__);
     CABasicAnimation *positionDownAni = [CABasicAnimation animationWithKeyPath:@"position.y"];
-    positionDownAni.toValue = @(self.musicCover.layer.position.y + kCoverHeight - 30);
-    positionDownAni.beginTime = 0;
-    positionDownAni.duration = 0.3;
+    positionDownAni.toValue = @(DeviceHeight/2);
 
     CABasicAnimation *frameAni = [CABasicAnimation animationWithKeyPath:@"bounds"];
     frameAni.toValue = [NSValue valueWithCGRect:CGRectMake(0, 0, kCoverHeight, kCoverHeight)];
-    frameAni.beginTime = 0;
-    frameAni.duration = 0.3;
     
     CABasicAnimation *radiusAni = [CABasicAnimation animationWithKeyPath:@"cornerRadius"];
     radiusAni.fromValue = @(0);
     radiusAni.toValue = @(kCoverHeight/2);
-    radiusAni.beginTime = 0;
-    radiusAni.duration = 0.3;
     
     CAAnimationGroup *group = [CAAnimationGroup animation];
     group.animations = @[positionDownAni, frameAni, radiusAni];
-    group.duration = radiusAni.beginTime + radiusAni.duration;
+    group.beginTime = 0;
+    group.duration = 0.3;
     group.removedOnCompletion = NO;
     group.fillMode = kCAFillModeForwards;
     group.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn];
@@ -109,8 +114,34 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
 #pragma mark - Play Bar Aniamtion
 - (void)playBarOpacityAnimationWithStatus:(playBarStatus)status {
     [UIView animateWithDuration:0.1 animations:^{
-        CGFloat opacity = status == show ? 1.0 : 0.0;
-        self.playBar.layer.opacity = opacity;
+        CGFloat opacity = status == show ? 0.5 : 0.0;
+        self.playBar.backgroundColor = [[UIColor darkGrayColor] colorWithAlphaComponent:opacity];
+    }];
+}
+
+#pragma mark - music title Aniamtion
+- (void)musicTitleAnimation {
+    CABasicAnimation *positionUpAni = [CABasicAnimation animationWithKeyPath:@"position.y"];
+    positionUpAni.toValue = @(kMusicTitleToHeight/2 + 44);
+    
+    CABasicAnimation *frameAni = [CABasicAnimation animationWithKeyPath:@"bounds.size.height"];
+    frameAni.toValue = @(kMusicTitleToHeight);
+    
+    CAAnimationGroup *group = [CAAnimationGroup animation];
+    group.animations = @[positionUpAni, frameAni];
+    group.beginTime = 0;
+    group.duration = 0.3;
+    group.removedOnCompletion = NO;
+    group.fillMode = kCAFillModeForwards;
+
+    [self.musicTitle.layer addAnimation:group forKey:nil];
+    self.musicTitle.layer.bounds = CGRectMake(0, 0, DeviceWidth - 40, kMusicTitleToHeight);
+    
+    [UIView animateWithDuration:0.3 animations:^{
+        for (NSInteger i = 12; i <= 20; i++) {
+            self.musicTitle.font = [UIFont systemFontOfSize:i];
+        }
+        self.musicTitle.textAlignment = NSTextAlignmentCenter;
     }];
 }
 
