@@ -9,6 +9,7 @@
 #import "ViewController.h"
 #import <QuartzCore/QuartzCore.h>
 #import "NSString+GCMusicPlayView.h"
+#import "CALayer+GCMusicPlayView.h"
 
 #define DeviceWidth CGRectGetWidth([UIScreen mainScreen].bounds)
 #define DeviceHeight CGRectGetHeight([UIScreen mainScreen].bounds)
@@ -118,15 +119,11 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
     
     CAAnimationGroup *group = [CAAnimationGroup animation];
     group.animations = @[positionDownAni, frameAni, radiusAni];
-    group.beginTime = 0;
-    group.duration = 0.3;
-    group.removedOnCompletion = NO;
-    group.fillMode = kCAFillModeForwards;
     group.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn];
     group.delegate = self;
     [group setValue:@"coverAnimation" forKey:@"ani"];
     
-    [self.musicCover.layer addAnimation:group forKey:nil];
+    [self.musicCover.layer gc_addAnimation:group forKey:nil];
 }
 
 - (void)coverRotated {
@@ -156,12 +153,8 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
     
     CAAnimationGroup *group = [CAAnimationGroup animation];
     group.animations = @[positionUpAni, frameAni];
-    group.beginTime = 0;
-    group.duration = 0.3;
-    group.removedOnCompletion = NO;
-    group.fillMode = kCAFillModeForwards;
 
-    [self.musicTitle.layer addAnimation:group forKey:nil];
+    [self.musicTitle.layer gc_addAnimation:group forKey:nil];
     self.musicTitle.layer.bounds = CGRectMake(0, 0, DeviceWidth - 40, kMusicTitleToHeight);
     
     [UIView animateWithDuration:0.3 animations:^{
@@ -176,12 +169,16 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
 - (void)playTimeLabel:(UILabel *)label addAnimationWithPositionXOffset:(CGFloat)positionXOffset {
     CABasicAnimation *positionAni = [CABasicAnimation animationWithKeyPath:@"position"];
     positionAni.toValue = [NSValue valueWithCGPoint:CGPointMake(DeviceWidth/2 + positionXOffset, DeviceHeight/2 + kCoverHeight/2 + kPlayTimeMarginYToCenter)];
-    positionAni.beginTime = 0;
-    positionAni.duration = 0.3;
-    positionAni.removedOnCompletion = NO;
-    positionAni.fillMode = kCAFillModeForwards;
     
-    [label.layer addAnimation:positionAni forKey:nil];
+    [label.layer gc_addAnimation:positionAni forKey:nil];
+}
+
+#pragma mark - Play Progress Aniamtion
+- (void)progressAnimation {
+//    UIBezierPath *path = [UIBezierPath bezierPathWithArcCenter:CGPointMake(DeviceWidth/2, DeviceHeight/2) radius:kCoverHeight + 30 startAngle:M_PI*2/3 endAngle:M_PI/3 clockwise:YES];
+//    CABasicAnimation *pathAni = [CABasicAnimation animationWithKeyPath:@"path"];
+//    pathAni.toValue = (__bridge id _Nullable)(path.CGPath);
+//    path.
 }
 
 - (void)animationDidStop:(CAAnimation *)animation finished:(BOOL)flag {
