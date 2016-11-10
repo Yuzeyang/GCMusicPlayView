@@ -8,6 +8,7 @@
 
 #import "ViewController.h"
 #import <QuartzCore/QuartzCore.h>
+#import "NSString+GCMusicPlayView.h"
 
 #define DeviceWidth CGRectGetWidth([UIScreen mainScreen].bounds)
 #define DeviceHeight CGRectGetHeight([UIScreen mainScreen].bounds)
@@ -16,6 +17,10 @@
 #define kPlayBarHeight 50
 #define kMusicTitleFromHeight 25
 #define kMusicTitleToHeight 50
+#define kPlayTimeWidth 50
+#define kPlayTimeHeight 25
+#define kPlayTimeMarginXToCenter 45
+#define kPlayTimeMarginYToCenter 15
 
 typedef NS_ENUM(NSUInteger, playBarStatus) {
     show,
@@ -27,6 +32,9 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
 @property (nonatomic, strong) UIImageView *musicCover;
 @property (nonatomic, strong) UIView *playBar;
 @property (nonatomic, strong) UILabel *musicTitle;
+@property (nonatomic, strong) UILabel *currentPlayTime;
+@property (nonatomic, strong) UILabel *musicPlayTime;
+@property (nonatomic, strong) UIView *playProgress;
 
 @end
 
@@ -52,12 +60,28 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
     [self.view addSubview:self.playBar];
     
     self.musicTitle = [[UILabel alloc] initWithFrame:CGRectMake(20, CGRectGetMaxY(self.playBar.frame) - kMusicTitleToHeight, DeviceWidth - 40, kMusicTitleFromHeight)];
-    NSMutableAttributedString *song = [[NSMutableAttributedString alloc] initWithString:@"Maps" attributes:@{NSForegroundColorAttributeName: [UIColor whiteColor]}];
-    NSMutableAttributedString *author = [[NSMutableAttributedString alloc] initWithString:@" - Bruno Mars" attributes:@{NSForegroundColorAttributeName: [UIColor lightGrayColor]}];
+    NSMutableAttributedString *song = [[NSMutableAttributedString alloc] initWithString:@"Maps" attributes:@{NSForegroundColorAttributeName: [UIColor whiteColor], NSFontAttributeName: [UIFont systemFontOfSize:12]}];
+    NSMutableAttributedString *author = [[NSMutableAttributedString alloc] initWithString:@" - Bruno Mars" attributes:@{NSForegroundColorAttributeName: [UIColor lightGrayColor], NSFontAttributeName: [UIFont systemFontOfSize:12]}];
     self.musicTitle.lineBreakMode = NSLineBreakByTruncatingTail;
     [song appendAttributedString:author];
     self.musicTitle.attributedText = song;
     [self.view addSubview:self.musicTitle];
+    
+    self.currentPlayTime = [[UILabel alloc] initWithFrame:CGRectMake(20, CGRectGetMaxY(self.musicTitle.frame), [@"0:00" stringWidthWithFontSize:12], kPlayTimeHeight)];
+    self.currentPlayTime.text = @"0:00";
+    self.currentPlayTime.textColor = [UIColor lightGrayColor];
+    self.currentPlayTime.font = [UIFont systemFontOfSize:12];
+    [self.view addSubview:self.currentPlayTime];
+    
+    self.playProgress = [[UIView alloc] initWithFrame:CGRectMake(CGRectGetMaxX(self.currentPlayTime.frame) + 10, CGRectGetMaxY(self.musicTitle.frame) + kPlayTimeHeight/2, DeviceWidth/2, 1)];
+    self.playProgress.backgroundColor = [UIColor lightGrayColor];
+    [self.view addSubview:self.playProgress];
+    
+    self.musicPlayTime = [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(self.playProgress.frame) + 10, CGRectGetMaxY(self.musicTitle.frame), [@"4:30" stringWidthWithFontSize:12], kPlayTimeHeight)];
+    self.musicPlayTime.text = @"4:30";
+    self.musicPlayTime.textColor = [UIColor lightGrayColor];
+    self.musicPlayTime.font = [UIFont systemFontOfSize:12];
+    [self.view addSubview:self.musicPlayTime];
     
     UIButton *aniBtn = [UIButton buttonWithType:UIButtonTypeCustom];
     [aniBtn setFrame:CGRectMake(20, 300, 30, 30)];
@@ -75,6 +99,9 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
     [self coverAnimation];
     [self playBarOpacityAnimationWithStatus:hide];
     [self musicTitleAnimation];
+    CGFloat xOffset = kPlayTimeMarginXToCenter + CGRectGetWidth(self.currentPlayTime.frame)/2;
+    [self playTimeLabel:self.currentPlayTime addAnimationWithPositionXOffset:-xOffset];
+    [self playTimeLabel:self.musicPlayTime addAnimationWithPositionXOffset:xOffset];
 }
 
 #pragma mark - Cover Animation
@@ -119,7 +146,7 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
     }];
 }
 
-#pragma mark - music title Aniamtion
+#pragma mark - Music Title Aniamtion
 - (void)musicTitleAnimation {
     CABasicAnimation *positionUpAni = [CABasicAnimation animationWithKeyPath:@"position.y"];
     positionUpAni.toValue = @(kMusicTitleToHeight/2 + 44);
@@ -143,6 +170,18 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
         }
         self.musicTitle.textAlignment = NSTextAlignmentCenter;
     }];
+}
+
+#pragma mark - Music Play Time Aniamtion
+- (void)playTimeLabel:(UILabel *)label addAnimationWithPositionXOffset:(CGFloat)positionXOffset {
+    CABasicAnimation *positionAni = [CABasicAnimation animationWithKeyPath:@"position"];
+    positionAni.toValue = [NSValue valueWithCGPoint:CGPointMake(DeviceWidth/2 + positionXOffset, DeviceHeight/2 + kCoverHeight/2 + kPlayTimeMarginYToCenter)];
+    positionAni.beginTime = 0;
+    positionAni.duration = 0.3;
+    positionAni.removedOnCompletion = NO;
+    positionAni.fillMode = kCAFillModeForwards;
+    
+    [label.layer addAnimation:positionAni forKey:nil];
 }
 
 - (void)animationDidStop:(CAAnimation *)animation finished:(BOOL)flag {

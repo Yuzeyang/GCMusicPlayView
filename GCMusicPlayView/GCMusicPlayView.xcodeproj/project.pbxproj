@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5B12A0261DD2E77500343E7C /* NSString+GCMusicPlayView.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B12A0251DD2E77500343E7C /* NSString+GCMusicPlayView.m */; };
 		5B1E1B5D1DC9EC0700920AA9 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B1E1B5C1DC9EC0700920AA9 /* main.m */; };
 		5B1E1B601DC9EC0700920AA9 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B1E1B5F1DC9EC0700920AA9 /* AppDelegate.m */; };
 		5B1E1B631DC9EC0700920AA9 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B1E1B621DC9EC0700920AA9 /* ViewController.m */; };
@@ -16,6 +17,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5B12A0241DD2E77500343E7C /* NSString+GCMusicPlayView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+GCMusicPlayView.h"; sourceTree = "<group>"; };
+		5B12A0251DD2E77500343E7C /* NSString+GCMusicPlayView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+GCMusicPlayView.m"; sourceTree = "<group>"; };
+		5B1738CB1DD4308C00B88E71 /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
 		5B1E1B581DC9EC0700920AA9 /* GCMusicPlayView.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GCMusicPlayView.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5B1E1B5C1DC9EC0700920AA9 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		5B1E1B5E1DC9EC0700920AA9 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -39,11 +43,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5B1738CA1DD4308C00B88E71 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				5B1738CB1DD4308C00B88E71 /* CoreText.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		5B1E1B4F1DC9EC0700920AA9 = {
 			isa = PBXGroup;
 			children = (
 				5B1E1B5A1DC9EC0700920AA9 /* GCMusicPlayView */,
 				5B1E1B591DC9EC0700920AA9 /* Products */,
+				5B1738CA1DD4308C00B88E71 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -62,6 +75,8 @@
 				5B1E1B5F1DC9EC0700920AA9 /* AppDelegate.m */,
 				5B1E1B611DC9EC0700920AA9 /* ViewController.h */,
 				5B1E1B621DC9EC0700920AA9 /* ViewController.m */,
+				5B12A0241DD2E77500343E7C /* NSString+GCMusicPlayView.h */,
+				5B12A0251DD2E77500343E7C /* NSString+GCMusicPlayView.m */,
 				5B1E1B641DC9EC0700920AA9 /* Main.storyboard */,
 				5B1E1B671DC9EC0700920AA9 /* Assets.xcassets */,
 				5B1E1B691DC9EC0700920AA9 /* LaunchScreen.storyboard */,
@@ -150,6 +165,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5B12A0261DD2E77500343E7C /* NSString+GCMusicPlayView.m in Sources */,
 				5B1E1B631DC9EC0700920AA9 /* ViewController.m in Sources */,
 				5B1E1B601DC9EC0700920AA9 /* AppDelegate.m in Sources */,
 				5B1E1B5D1DC9EC0700920AA9 /* main.m in Sources */,
@@ -309,6 +325,7 @@
 				5B1E1B711DC9EC0700920AA9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
