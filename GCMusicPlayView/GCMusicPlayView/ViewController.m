@@ -35,7 +35,7 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
 @property (nonatomic, strong) UILabel *musicTitle;
 @property (nonatomic, strong) UILabel *currentPlayTime;
 @property (nonatomic, strong) UILabel *musicPlayTime;
-@property (nonatomic, strong) UIView *playProgress;
+@property (nonatomic, strong) CAShapeLayer *playProgress;
 
 @end
 
@@ -74,11 +74,15 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
     self.currentPlayTime.font = [UIFont systemFontOfSize:12];
     [self.view addSubview:self.currentPlayTime];
     
-    self.playProgress = [[UIView alloc] initWithFrame:CGRectMake(CGRectGetMaxX(self.currentPlayTime.frame) + 10, CGRectGetMaxY(self.musicTitle.frame) + kPlayTimeHeight/2, DeviceWidth/2, 1)];
-    self.playProgress.backgroundColor = [UIColor lightGrayColor];
-    [self.view addSubview:self.playProgress];
+    UIBezierPath *path = [UIBezierPath bezierPathWithRect:CGRectMake(CGRectGetMaxX(self.currentPlayTime.frame) + 10, CGRectGetMaxY(self.musicTitle.frame) + kPlayTimeHeight/2, DeviceWidth/2, 1)];
+    self.playProgress = [CAShapeLayer layer];
+    self.playProgress.path = path.CGPath;
+    self.playProgress.fillColor = [UIColor lightGrayColor].CGColor;//[UIColor colorWithRed:255.0/255.0 green:80.0/255.0 blue:80.0/255.0 alpha:1].CGColor;
+    self.playProgress.strokeColor = [UIColor lightGrayColor].CGColor;
+    self.playProgress.lineWidth = 1;
+    [self.view.layer addSublayer:self.playProgress];
     
-    self.musicPlayTime = [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(self.playProgress.frame) + 10, CGRectGetMaxY(self.musicTitle.frame), [@"4:30" stringWidthWithFontSize:12], kPlayTimeHeight)];
+    self.musicPlayTime = [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(self.currentPlayTime.frame) + 20 + DeviceWidth/2, CGRectGetMaxY(self.musicTitle.frame), [@"4:30" stringWidthWithFontSize:12], kPlayTimeHeight)];
     self.musicPlayTime.text = @"4:30";
     self.musicPlayTime.textColor = [UIColor lightGrayColor];
     self.musicPlayTime.font = [UIFont systemFontOfSize:12];
@@ -103,6 +107,7 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
     CGFloat xOffset = kPlayTimeMarginXToCenter + CGRectGetWidth(self.currentPlayTime.frame)/2;
     [self playTimeLabel:self.currentPlayTime addAnimationWithPositionXOffset:-xOffset];
     [self playTimeLabel:self.musicPlayTime addAnimationWithPositionXOffset:xOffset];
+    [self progressAnimation];
 }
 
 #pragma mark - Cover Animation
@@ -169,16 +174,17 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
 - (void)playTimeLabel:(UILabel *)label addAnimationWithPositionXOffset:(CGFloat)positionXOffset {
     CABasicAnimation *positionAni = [CABasicAnimation animationWithKeyPath:@"position"];
     positionAni.toValue = [NSValue valueWithCGPoint:CGPointMake(DeviceWidth/2 + positionXOffset, DeviceHeight/2 + kCoverHeight/2 + kPlayTimeMarginYToCenter)];
-    
     [label.layer gc_addAnimation:positionAni forKey:nil];
 }
 
 #pragma mark - Play Progress Aniamtion
 - (void)progressAnimation {
-//    UIBezierPath *path = [UIBezierPath bezierPathWithArcCenter:CGPointMake(DeviceWidth/2, DeviceHeight/2) radius:kCoverHeight + 30 startAngle:M_PI*2/3 endAngle:M_PI/3 clockwise:YES];
-//    CABasicAnimation *pathAni = [CABasicAnimation animationWithKeyPath:@"path"];
-//    pathAni.toValue = (__bridge id _Nullable)(path.CGPath);
-//    path.
+    UIBezierPath *path = [UIBezierPath bezierPathWithArcCenter:CGPointMake(DeviceWidth/2, DeviceHeight/2) radius:kCoverHeight/2 + 20 startAngle:M_PI*2/3 endAngle:M_PI/3 clockwise:YES];
+    CABasicAnimation *pathAni = [CABasicAnimation animationWithKeyPath:@"path"];
+    pathAni.toValue = (__bridge id _Nullable)(path.CGPath);
+    [self.playProgress gc_addAnimation:pathAni forKey:nil];
+    
+    self.playProgress.fillColor = [UIColor clearColor].CGColor;
 }
 
 - (void)animationDidStop:(CAAnimation *)animation finished:(BOOL)flag {

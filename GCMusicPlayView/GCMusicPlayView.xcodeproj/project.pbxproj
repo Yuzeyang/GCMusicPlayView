@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		5B12A0261DD2E77500343E7C /* NSString+GCMusicPlayView.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B12A0251DD2E77500343E7C /* NSString+GCMusicPlayView.m */; };
 		5B1738CF1DD43C3100B88E71 /* CALayer+GCMusicPlayView.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B1738CE1DD43C3100B88E71 /* CALayer+GCMusicPlayView.m */; };
+		5B1738DE1DD74E0100B88E71 /* GCPlayButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B1738DD1DD74E0100B88E71 /* GCPlayButton.m */; };
 		5B1E1B5D1DC9EC0700920AA9 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B1E1B5C1DC9EC0700920AA9 /* main.m */; };
 		5B1E1B601DC9EC0700920AA9 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B1E1B5F1DC9EC0700920AA9 /* AppDelegate.m */; };
 		5B1E1B631DC9EC0700920AA9 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B1E1B621DC9EC0700920AA9 /* ViewController.m */; };
@@ -23,6 +24,8 @@
 		5B1738CB1DD4308C00B88E71 /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
 		5B1738CD1DD43C3100B88E71 /* CALayer+GCMusicPlayView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CALayer+GCMusicPlayView.h"; sourceTree = "<group>"; };
 		5B1738CE1DD43C3100B88E71 /* CALayer+GCMusicPlayView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CALayer+GCMusicPlayView.m"; sourceTree = "<group>"; };
+		5B1738DC1DD74E0100B88E71 /* GCPlayButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCPlayButton.h; sourceTree = "<group>"; };
+		5B1738DD1DD74E0100B88E71 /* GCPlayButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GCPlayButton.m; sourceTree = "<group>"; };
 		5B1E1B581DC9EC0700920AA9 /* GCMusicPlayView.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GCMusicPlayView.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5B1E1B5C1DC9EC0700920AA9 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		5B1E1B5E1DC9EC0700920AA9 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -78,6 +81,8 @@
 				5B1E1B5F1DC9EC0700920AA9 /* AppDelegate.m */,
 				5B1E1B611DC9EC0700920AA9 /* ViewController.h */,
 				5B1E1B621DC9EC0700920AA9 /* ViewController.m */,
+				5B1738DC1DD74E0100B88E71 /* GCPlayButton.h */,
+				5B1738DD1DD74E0100B88E71 /* GCPlayButton.m */,
 				5B12A0241DD2E77500343E7C /* NSString+GCMusicPlayView.h */,
 				5B12A0251DD2E77500343E7C /* NSString+GCMusicPlayView.m */,
 				5B1738CD1DD43C3100B88E71 /* CALayer+GCMusicPlayView.h */,
@@ -175,6 +180,7 @@
 				5B1738CF1DD43C3100B88E71 /* CALayer+GCMusicPlayView.m in Sources */,
 				5B1E1B601DC9EC0700920AA9 /* AppDelegate.m in Sources */,
 				5B1E1B5D1DC9EC0700920AA9 /* main.m in Sources */,
+				5B1738DE1DD74E0100B88E71 /* GCPlayButton.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
