@@ -10,6 +10,7 @@
 #import <QuartzCore/QuartzCore.h>
 #import "NSString+GCMusicPlayView.h"
 #import "CALayer+GCMusicPlayView.h"
+#import "GCPlayButton.h"
 
 #define DeviceWidth CGRectGetWidth([UIScreen mainScreen].bounds)
 #define DeviceHeight CGRectGetHeight([UIScreen mainScreen].bounds)
@@ -22,6 +23,7 @@
 #define kPlayTimeHeight 25
 #define kPlayTimeMarginXToCenter 45
 #define kPlayTimeMarginYToCenter 15
+#define kPlayButtonWidth 40
 
 typedef NS_ENUM(NSUInteger, playBarStatus) {
     show,
@@ -36,6 +38,7 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
 @property (nonatomic, strong) UILabel *currentPlayTime;
 @property (nonatomic, strong) UILabel *musicPlayTime;
 @property (nonatomic, strong) CAShapeLayer *playProgress;
+@property (nonatomic, strong) GCPlayButton *playButton;
 
 @end
 
@@ -87,6 +90,9 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
     self.musicPlayTime.textColor = [UIColor lightGrayColor];
     self.musicPlayTime.font = [UIFont systemFontOfSize:12];
     [self.view addSubview:self.musicPlayTime];
+    
+    self.playButton = [[GCPlayButton alloc] initWithFrame:CGRectMake(DeviceWidth - kPlayButtonWidth - 15, CGRectGetMaxY(self.playBar.frame) - kPlayButtonWidth/2, kPlayButtonWidth, kPlayButtonWidth)];
+    [self.view addSubview:self.playButton];
     
     UIButton *aniBtn = [UIButton buttonWithType:UIButtonTypeCustom];
     [aniBtn setFrame:CGRectMake(20, 300, 30, 30)];

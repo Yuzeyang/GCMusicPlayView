@@ -10,6 +10,7 @@
 
 @interface CALayer (GCMusicPlayView)
 
+- (void)gc_addAnimation:(CAAnimation *)anim forKey:(NSString *)key withDuration:(CGFloat)duration;
 - (void)gc_addAnimation:(CAAnimation *)anim forKey:(NSString *)key;
 
 @end

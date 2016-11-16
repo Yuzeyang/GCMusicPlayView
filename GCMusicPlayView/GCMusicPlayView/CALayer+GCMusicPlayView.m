@@ -10,13 +10,17 @@
 
 @implementation CALayer (GCMusicPlayView)
 
-- (void)gc_addAnimation:(CAAnimation *)anim forKey:(NSString *)key {
+- (void)gc_addAnimation:(CAAnimation *)anim forKey:(NSString *)key withDuration:(CGFloat)duration {
     anim.beginTime = 0;
-    anim.duration = 0.3;
+    anim.duration = duration;
     anim.removedOnCompletion = NO;
     anim.fillMode = kCAFillModeForwards;
     
     [self addAnimation:anim forKey:key];
+}
+
+- (void)gc_addAnimation:(CAAnimation *)anim forKey:(NSString *)key {
+    [self gc_addAnimation:anim forKey:key withDuration:0.3];
 }
 
 @end
