@@ -96,7 +96,6 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
     self.playButton.playHanlder = ^() {
         __strong __typeof(weakSelf)strongSelf = weakSelf;
         [strongSelf startPlay];
-        [strongSelf playButtonAnimationWithToPosition:CGPointMake(DeviceWidth/2, DeviceHeight/2)];
     };
     self.playButton.suspendedHanlder = ^() {
         
@@ -123,6 +122,7 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
     [self playTimeLabel:self.currentPlayTime addAnimationWithPositionXOffset:-xOffset];
     [self playTimeLabel:self.musicPlayTime addAnimationWithPositionXOffset:xOffset];
     [self progressAnimation];
+    [self playButtonAnimationWithToPosition:CGPointMake(DeviceWidth/2, DeviceHeight/2)];
 }
 
 #pragma mark - Cover Animation
