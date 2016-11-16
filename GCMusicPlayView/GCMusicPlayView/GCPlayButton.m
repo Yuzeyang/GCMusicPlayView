@@ -67,8 +67,14 @@ typedef NS_ENUM(NSUInteger, PlayState) {
     self.tapGes.enabled = NO;
     if (!self.isPlaying) {
         [self playAniOne];
+        if (self.playHanlder) {
+            self.playHanlder();
+        }
     } else {
         [self suspendedAniOne];
+        if (self.suspendedHanlder) {
+            self.suspendedHanlder();
+        }
     }
 }
 

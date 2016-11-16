@@ -92,13 +92,22 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
     [self.view addSubview:self.musicPlayTime];
     
     self.playButton = [[GCPlayButton alloc] initWithFrame:CGRectMake(DeviceWidth - kPlayButtonWidth - 15, CGRectGetMaxY(self.playBar.frame) - kPlayButtonWidth/2, kPlayButtonWidth, kPlayButtonWidth)];
+    __weak __typeof(self)weakSelf = self;
+    self.playButton.playHanlder = ^() {
+        __strong __typeof(weakSelf)strongSelf = weakSelf;
+        [strongSelf startPlay];
+        [strongSelf playButtonAnimationWithToPosition:CGPointMake(DeviceWidth/2, DeviceHeight/2)];
+    };
+    self.playButton.suspendedHanlder = ^() {
+        
+    };
     [self.view addSubview:self.playButton];
     
-    UIButton *aniBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-    [aniBtn setFrame:CGRectMake(20, 300, 30, 30)];
-    [aniBtn addTarget:self action:@selector(startPlay) forControlEvents:UIControlEventTouchUpInside];
-    aniBtn.backgroundColor = [UIColor redColor];
-    [self.view addSubview:aniBtn];
+//    UIButton *aniBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+//    [aniBtn setFrame:CGRectMake(20, 300, 30, 30)];
+//    [aniBtn addTarget:self action:@selector(startPlay) forControlEvents:UIControlEventTouchUpInside];
+//    aniBtn.backgroundColor = [UIColor redColor];
+//    [self.view addSubview:aniBtn];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -191,6 +200,13 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
     [self.playProgress gc_addAnimation:pathAni forKey:nil];
     
     self.playProgress.fillColor = [UIColor clearColor].CGColor;
+}
+
+#pragma mark - Play Button Animation
+- (void)playButtonAnimationWithToPosition:(CGPoint)position {
+    CABasicAnimation *positionAni = [CABasicAnimation animationWithKeyPath:@"position"];
+    positionAni.toValue = [NSValue valueWithCGPoint:position];
+    [self.playButton.layer gc_addAnimation:positionAni forKey:nil];
 }
 
 - (void)animationDidStop:(CAAnimation *)animation finished:(BOOL)flag {

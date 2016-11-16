@@ -10,4 +10,7 @@
 
 @interface GCPlayButton : UIView
 
+@property (nonatomic, copy) void(^playHanlder)();
+@property (nonatomic, copy) void(^suspendedHanlder)();
+
 @end
