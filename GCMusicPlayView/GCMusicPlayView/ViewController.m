@@ -63,7 +63,7 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
     self.playBar.backgroundColor = [[UIColor darkGrayColor] colorWithAlphaComponent:0.5];
     [self.view addSubview:self.playBar];
     
-    self.musicTitle = [[UILabel alloc] initWithFrame:CGRectMake(20, CGRectGetMaxY(self.playBar.frame) - kMusicTitleToHeight, DeviceWidth - 40, kMusicTitleFromHeight)];
+    self.musicTitle = [[UILabel alloc] initWithFrame:CGRectMake(20, CGRectGetMinY(self.playBar.frame), DeviceWidth - 40, kMusicTitleFromHeight)];
     NSMutableAttributedString *song = [[NSMutableAttributedString alloc] initWithString:@"Maps" attributes:@{NSForegroundColorAttributeName: [UIColor whiteColor], NSFontAttributeName: [UIFont systemFontOfSize:12]}];
     NSMutableAttributedString *author = [[NSMutableAttributedString alloc] initWithString:@" - Bruno Mars" attributes:@{NSForegroundColorAttributeName: [UIColor lightGrayColor], NSFontAttributeName: [UIFont systemFontOfSize:12]}];
     self.musicTitle.lineBreakMode = NSLineBreakByTruncatingTail;
@@ -98,15 +98,10 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
         [strongSelf startPlay];
     };
     self.playButton.suspendedHanlder = ^() {
-        
+        __strong __typeof(weakSelf)strongSelf = weakSelf;
+        [strongSelf stopPlay];
     };
     [self.view addSubview:self.playButton];
-    
-//    UIButton *aniBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-//    [aniBtn setFrame:CGRectMake(20, 300, 30, 30)];
-//    [aniBtn addTarget:self action:@selector(startPlay) forControlEvents:UIControlEventTouchUpInside];
-//    aniBtn.backgroundColor = [UIColor redColor];
-//    [self.view addSubview:aniBtn];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -115,41 +110,54 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
 }
 
 - (void)startPlay {
-    [self coverAnimation];
+    [self coverAnimationWithPositionY:DeviceHeight/2 bounds:CGRectMake(0, 0, kCoverHeight, kCoverHeight) cornerRadius:kCoverHeight/2 keyValue:@"coverPlayAnimation"];
     [self playBarOpacityAnimationWithStatus:hide];
-    [self musicTitleAnimation];
+    [self musicTitleAnimationWithPositionY:kMusicTitleToHeight/2 + 44 height:kMusicTitleToHeight bounds:CGRectMake(0, 0, DeviceWidth - 40, kMusicTitleToHeight) fromFontSize:12 toFontSize:20];
     CGFloat xOffset = kPlayTimeMarginXToCenter + CGRectGetWidth(self.currentPlayTime.frame)/2;
-    [self playTimeLabel:self.currentPlayTime addAnimationWithPositionXOffset:-xOffset];
-    [self playTimeLabel:self.musicPlayTime addAnimationWithPositionXOffset:xOffset];
-    [self progressAnimation];
-    [self playButtonAnimationWithToPosition:CGPointMake(DeviceWidth/2, DeviceHeight/2)];
+    [self playTimeLabel:self.currentPlayTime addAnimationWithPosition:CGPointMake(DeviceWidth/2 - xOffset, DeviceHeight/2 + kCoverHeight/2 + kPlayTimeMarginYToCenter)];
+    [self playTimeLabel:self.musicPlayTime addAnimationWithPosition:CGPointMake(DeviceWidth/2 + xOffset, DeviceHeight/2 + kCoverHeight/2 + kPlayTimeMarginYToCenter)];
+    UIBezierPath *path = [UIBezierPath bezierPathWithArcCenter:CGPointMake(DeviceWidth/2, DeviceHeight/2) radius:kCoverHeight/2 + 20 startAngle:M_PI*2/3 endAngle:M_PI/3 clockwise:YES];
+    [self progressAnimationWithPath:path];
+    self.playProgress.fillColor = [UIColor clearColor].CGColor;
+    [self playButtonAnimationToCenter:CGPointMake(DeviceWidth/2, DeviceHeight/2)];
+}
+
+- (void)stopPlay {
+    [self coverAnimationWithPositionY:kCoverHeight/2 bounds:CGRectMake(0, 0, DeviceWidth, kCoverHeight) cornerRadius:0 keyValue:@"coverSuspendedAnimation"];
+    [self playBarOpacityAnimationWithStatus:show];
+    [self musicTitleAnimationWithPositionY:CGRectGetMinY(self.playBar.frame) + kMusicTitleFromHeight/2 height:kMusicTitleFromHeight bounds:CGRectMake(0, 0, DeviceWidth - 40, kMusicTitleFromHeight) fromFontSize:20 toFontSize:12];
+    [self playTimeLabel:self.currentPlayTime addAnimationWithPosition:self.currentPlayTime.layer.position];
+    [self playTimeLabel:self.musicPlayTime addAnimationWithPosition:self.musicPlayTime.layer.position];
+    UIBezierPath *path = [UIBezierPath bezierPathWithRect:CGRectMake(CGRectGetMaxX(self.currentPlayTime.frame) + 10, CGRectGetMaxY(self.musicTitle.frame) + kPlayTimeHeight/2, DeviceWidth/2, 1)];
+    [self progressAnimationWithPath:path];
+    self.playProgress.fillColor = [UIColor lightGrayColor].CGColor;//[UIColor colorWithRed:255.0/255.0 green:80.0/255.0 blue:80.0/255.0 alpha:1].CGColor;
+    self.playProgress.strokeColor = [UIColor lightGrayColor].CGColor;
+    [self playButtonAnimationToCenter:CGPointMake(DeviceWidth - kPlayButtonWidth/2 - 15, CGRectGetMaxY(self.playBar.frame))];
 }
 
 #pragma mark - Cover Animation
-- (void)coverAnimation {
+- (void)coverAnimationWithPositionY:(CGFloat)positionY bounds:(CGRect)bounds cornerRadius:(CGFloat)cornerRadius keyValue:(NSString *)value {
     CABasicAnimation *positionDownAni = [CABasicAnimation animationWithKeyPath:@"position.y"];
-    positionDownAni.toValue = @(DeviceHeight/2);
-
+    positionDownAni.toValue = @(positionY);
+    
     CABasicAnimation *frameAni = [CABasicAnimation animationWithKeyPath:@"bounds"];
-    frameAni.toValue = [NSValue valueWithCGRect:CGRectMake(0, 0, kCoverHeight, kCoverHeight)];
+    frameAni.toValue = [NSValue valueWithCGRect:bounds];
     
     CABasicAnimation *radiusAni = [CABasicAnimation animationWithKeyPath:@"cornerRadius"];
-    radiusAni.fromValue = @(0);
-    radiusAni.toValue = @(kCoverHeight/2);
+    radiusAni.toValue = @(cornerRadius);
     
     CAAnimationGroup *group = [CAAnimationGroup animation];
     group.animations = @[positionDownAni, frameAni, radiusAni];
-    group.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn];
     group.delegate = self;
-    [group setValue:@"coverAnimation" forKey:@"ani"];
+    [group setValue:value forKey:@"ani"];
     
     [self.musicCover.layer gc_addAnimation:group forKey:nil];
 }
 
-- (void)coverRotated {
+- (void)coverRotatedToAngle:(CGFloat)angle {
     CABasicAnimation *rotateAni = [CABasicAnimation animationWithKeyPath:@"transform.rotation.z"];
-    rotateAni.toValue = @(M_PI*2);
-    rotateAni.repeatCount = HUGE_VALF;
+    rotateAni.toValue = @(angle);
+    rotateAni.repeatCount = angle == 0 ? 0 : HUGE_VALF;
     rotateAni.beginTime = 0;
     rotateAni.duration = 5;
     [self.musicCover.layer addAnimation:rotateAni forKey:nil];
@@ -164,21 +172,21 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
 }
 
 #pragma mark - Music Title Aniamtion
-- (void)musicTitleAnimation {
-    CABasicAnimation *positionUpAni = [CABasicAnimation animationWithKeyPath:@"position.y"];
-    positionUpAni.toValue = @(kMusicTitleToHeight/2 + 44);
+- (void)musicTitleAnimationWithPositionY:(CGFloat)positionY height:(CGFloat)height bounds:(CGRect)bounds fromFontSize:(CGFloat)fromFontSize toFontSize:(CGFloat)toFontSize {
+    CABasicAnimation *positionAni = [CABasicAnimation animationWithKeyPath:@"position.y"];
+    positionAni.toValue = @(positionY);
     
     CABasicAnimation *frameAni = [CABasicAnimation animationWithKeyPath:@"bounds.size.height"];
-    frameAni.toValue = @(kMusicTitleToHeight);
+    frameAni.toValue = @(height);
     
     CAAnimationGroup *group = [CAAnimationGroup animation];
-    group.animations = @[positionUpAni, frameAni];
-
+    group.animations = @[positionAni, frameAni];
+    
     [self.musicTitle.layer gc_addAnimation:group forKey:nil];
-    self.musicTitle.layer.bounds = CGRectMake(0, 0, DeviceWidth - 40, kMusicTitleToHeight);
+    self.musicTitle.layer.bounds = bounds;
     
     [UIView animateWithDuration:0.3 animations:^{
-        for (NSInteger i = 12; i <= 20; i++) {
+        for (NSInteger i = fromFontSize; i <= toFontSize; i++) {
             self.musicTitle.font = [UIFont systemFontOfSize:i];
         }
         self.musicTitle.textAlignment = NSTextAlignmentCenter;
@@ -186,33 +194,32 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
 }
 
 #pragma mark - Music Play Time Aniamtion
-- (void)playTimeLabel:(UILabel *)label addAnimationWithPositionXOffset:(CGFloat)positionXOffset {
+- (void)playTimeLabel:(UILabel *)label addAnimationWithPosition:(CGPoint)position {
     CABasicAnimation *positionAni = [CABasicAnimation animationWithKeyPath:@"position"];
-    positionAni.toValue = [NSValue valueWithCGPoint:CGPointMake(DeviceWidth/2 + positionXOffset, DeviceHeight/2 + kCoverHeight/2 + kPlayTimeMarginYToCenter)];
+    positionAni.toValue = [NSValue valueWithCGPoint:position];
     [label.layer gc_addAnimation:positionAni forKey:nil];
 }
 
 #pragma mark - Play Progress Aniamtion
-- (void)progressAnimation {
-    UIBezierPath *path = [UIBezierPath bezierPathWithArcCenter:CGPointMake(DeviceWidth/2, DeviceHeight/2) radius:kCoverHeight/2 + 20 startAngle:M_PI*2/3 endAngle:M_PI/3 clockwise:YES];
+- (void)progressAnimationWithPath:(UIBezierPath *)path {
     CABasicAnimation *pathAni = [CABasicAnimation animationWithKeyPath:@"path"];
     pathAni.toValue = (__bridge id _Nullable)(path.CGPath);
     [self.playProgress gc_addAnimation:pathAni forKey:nil];
-    
-    self.playProgress.fillColor = [UIColor clearColor].CGColor;
 }
 
 #pragma mark - Play Button Animation
-- (void)playButtonAnimationWithToPosition:(CGPoint)position {
-    CABasicAnimation *positionAni = [CABasicAnimation animationWithKeyPath:@"position"];
-    positionAni.toValue = [NSValue valueWithCGPoint:position];
-    [self.playButton.layer gc_addAnimation:positionAni forKey:nil];
+- (void)playButtonAnimationToCenter:(CGPoint)center {
+    [UIView animateWithDuration:0.3 animations:^{
+        [self.playButton setCenter:center];
+    }];
 }
 
 - (void)animationDidStop:(CAAnimation *)animation finished:(BOOL)flag {
     NSString *ani = [animation valueForKey:@"ani"];
-    if ([ani isEqualToString:@"coverAnimation"]) {
-        [self coverRotated];
+    if ([ani isEqualToString:@"coverPlayAnimation"]) {
+        [self coverRotatedToAngle:M_PI*2];
+    } else {
+        [self coverRotatedToAngle:0];
     }
 }
 
