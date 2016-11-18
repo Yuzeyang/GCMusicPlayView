@@ -63,7 +63,7 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
     self.playBar.backgroundColor = [[UIColor darkGrayColor] colorWithAlphaComponent:0.5];
     [self.view addSubview:self.playBar];
     
-    self.musicTitle = [[UILabel alloc] initWithFrame:CGRectMake(20, CGRectGetMinY(self.playBar.frame), DeviceWidth - 40, kMusicTitleFromHeight)];
+    self.musicTitle = [[UILabel alloc] initWithFrame:CGRectMake(20, CGRectGetMinY(self.playBar.frame), DeviceWidth/2, kMusicTitleFromHeight)];
     NSMutableAttributedString *song = [[NSMutableAttributedString alloc] initWithString:@"Maps" attributes:@{NSForegroundColorAttributeName: [UIColor whiteColor], NSFontAttributeName: [UIFont systemFontOfSize:12]}];
     NSMutableAttributedString *author = [[NSMutableAttributedString alloc] initWithString:@" - Bruno Mars" attributes:@{NSForegroundColorAttributeName: [UIColor lightGrayColor], NSFontAttributeName: [UIFont systemFontOfSize:12]}];
     self.musicTitle.lineBreakMode = NSLineBreakByTruncatingTail;
@@ -112,7 +112,7 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
 - (void)startPlay {
     [self coverAnimationWithPositionY:DeviceHeight/2 bounds:CGRectMake(0, 0, kCoverHeight, kCoverHeight) cornerRadius:kCoverHeight/2 keyValue:@"coverPlayAnimation"];
     [self playBarOpacityAnimationWithStatus:hide];
-    [self musicTitleAnimationWithPositionY:kMusicTitleToHeight/2 + 44 height:kMusicTitleToHeight bounds:CGRectMake(0, 0, DeviceWidth - 40, kMusicTitleToHeight) fromFontSize:12 toFontSize:20];
+    [self musicTitleAnimationWithPosition:CGPointMake(DeviceWidth/2, kMusicTitleToHeight/2 + 44) height:kMusicTitleToHeight bounds:CGRectMake(0, 0, DeviceWidth/2, kMusicTitleToHeight) fromFontSize:12 toFontSize:20 textAlignment:NSTextAlignmentCenter];
     CGFloat xOffset = kPlayTimeMarginXToCenter + CGRectGetWidth(self.currentPlayTime.frame)/2;
     [self playTimeLabel:self.currentPlayTime addAnimationWithPosition:CGPointMake(DeviceWidth/2 - xOffset, DeviceHeight/2 + kCoverHeight/2 + kPlayTimeMarginYToCenter)];
     [self playTimeLabel:self.musicPlayTime addAnimationWithPosition:CGPointMake(DeviceWidth/2 + xOffset, DeviceHeight/2 + kCoverHeight/2 + kPlayTimeMarginYToCenter)];
@@ -123,9 +123,13 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
 }
 
 - (void)stopPlay {
+    
+    NSLog(@"%lf",[(NSNumber *)[self.musicCover.layer valueForKeyPath:@"transform.rotation.z"] floatValue]);
     [self coverAnimationWithPositionY:kCoverHeight/2 bounds:CGRectMake(0, 0, DeviceWidth, kCoverHeight) cornerRadius:0 keyValue:@"coverSuspendedAnimation"];
+//    [self.musicCover.layer convertTime:CACurrentMediaTime() fromLayer:nil];
+    [self coverRotatedToAngle:0 duration:0.3];
     [self playBarOpacityAnimationWithStatus:show];
-    [self musicTitleAnimationWithPositionY:CGRectGetMinY(self.playBar.frame) + kMusicTitleFromHeight/2 height:kMusicTitleFromHeight bounds:CGRectMake(0, 0, DeviceWidth - 40, kMusicTitleFromHeight) fromFontSize:20 toFontSize:12];
+    [self musicTitleAnimationWithPosition:CGPointMake(DeviceWidth/4 + 20, CGRectGetMinY(self.playBar.frame) + kMusicTitleFromHeight/2) height:kMusicTitleFromHeight bounds:CGRectMake(0, 0, DeviceWidth/2, kMusicTitleFromHeight) fromFontSize:20 toFontSize:12 textAlignment:NSTextAlignmentLeft];
     [self playTimeLabel:self.currentPlayTime addAnimationWithPosition:self.currentPlayTime.layer.position];
     [self playTimeLabel:self.musicPlayTime addAnimationWithPosition:self.musicPlayTime.layer.position];
     UIBezierPath *path = [UIBezierPath bezierPathWithRect:CGRectMake(CGRectGetMaxX(self.currentPlayTime.frame) + 10, CGRectGetMaxY(self.musicTitle.frame) + kPlayTimeHeight/2, DeviceWidth/2, 1)];
@@ -154,12 +158,19 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
     [self.musicCover.layer gc_addAnimation:group forKey:nil];
 }
 
-- (void)coverRotatedToAngle:(CGFloat)angle {
+- (void)coverRotatedToAngle:(CGFloat)angle duration:(CGFloat)duration {
     CABasicAnimation *rotateAni = [CABasicAnimation animationWithKeyPath:@"transform.rotation.z"];
     rotateAni.toValue = @(angle);
-    rotateAni.repeatCount = angle == 0 ? 0 : HUGE_VALF;
+    if (angle == M_PI*2) {
+        rotateAni.delegate = self;
+        [rotateAni setValue:@"coverRotated" forKey:@"ani"];
+    } else if (angle != 0) {
+        rotateAni.repeatCount = HUGE_VALF;
+        
+    }
     rotateAni.beginTime = 0;
-    rotateAni.duration = 5;
+    rotateAni.duration = duration;
+    
     [self.musicCover.layer addAnimation:rotateAni forKey:nil];
 }
 
@@ -172,9 +183,9 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
 }
 
 #pragma mark - Music Title Aniamtion
-- (void)musicTitleAnimationWithPositionY:(CGFloat)positionY height:(CGFloat)height bounds:(CGRect)bounds fromFontSize:(CGFloat)fromFontSize toFontSize:(CGFloat)toFontSize {
-    CABasicAnimation *positionAni = [CABasicAnimation animationWithKeyPath:@"position.y"];
-    positionAni.toValue = @(positionY);
+- (void)musicTitleAnimationWithPosition:(CGPoint)position height:(CGFloat)height bounds:(CGRect)bounds fromFontSize:(CGFloat)fromFontSize toFontSize:(CGFloat)toFontSize textAlignment:(NSTextAlignment)textAlignment {
+    CABasicAnimation *positionAni = [CABasicAnimation animationWithKeyPath:@"position"];
+    positionAni.toValue = [NSValue valueWithCGPoint:position];
     
     CABasicAnimation *frameAni = [CABasicAnimation animationWithKeyPath:@"bounds.size.height"];
     frameAni.toValue = @(height);
@@ -186,10 +197,16 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
     self.musicTitle.layer.bounds = bounds;
     
     [UIView animateWithDuration:0.3 animations:^{
-        for (NSInteger i = fromFontSize; i <= toFontSize; i++) {
-            self.musicTitle.font = [UIFont systemFontOfSize:i];
+        if (fromFontSize <= toFontSize) {
+            for (NSInteger i = fromFontSize; i <= toFontSize; i++) {
+                self.musicTitle.font = [UIFont systemFontOfSize:i];
+            }
+        } else {
+            for (NSInteger i = fromFontSize; i >= toFontSize; i--) {
+                self.musicTitle.font = [UIFont systemFontOfSize:i];
+            }
         }
-        self.musicTitle.textAlignment = NSTextAlignmentCenter;
+        self.musicTitle.textAlignment = textAlignment;
     }];
 }
 
@@ -217,9 +234,15 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
 - (void)animationDidStop:(CAAnimation *)animation finished:(BOOL)flag {
     NSString *ani = [animation valueForKey:@"ani"];
     if ([ani isEqualToString:@"coverPlayAnimation"]) {
-        [self coverRotatedToAngle:M_PI*2];
-    } else {
-        [self coverRotatedToAngle:0];
+        [self coverRotatedToAngle:M_PI*2 duration:5];
+    } else if ([ani isEqualToString:@"coverSuspendedAnimation"]) {
+//        [self.musicCover.layer removeAllAnimations];
+//        self.musicCover.layer.transform = CATransform3DIdentity;
+//        [self coverRotatedToAngle:0 duration:0.3];
+        [self.musicCover.layer removeAllAnimations];
+    } else if ([ani isEqualToString:@"coverRotated"]) {
+        
+        [self.musicCover.layer removeAllAnimations];
     }
 }
 
