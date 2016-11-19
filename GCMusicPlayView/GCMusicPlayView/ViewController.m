@@ -110,7 +110,7 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
 }
 
 - (void)startPlay {
-    [self coverAnimationWithPositionY:DeviceHeight/2 bounds:CGRectMake(0, 0, kCoverHeight, kCoverHeight) cornerRadius:kCoverHeight/2 keyValue:@"coverPlayAnimation"];
+    [self coverAnimationWithPositionY:DeviceHeight/2 bounds:CGRectMake(0, 0, kCoverHeight, kCoverHeight) cornerRadius:kCoverHeight/2 keyValue:@"coverPlayAnimation" duration:0.3];
     [self playBarOpacityAnimationWithStatus:hide];
     [self musicTitleAnimationWithPosition:CGPointMake(DeviceWidth/2, kMusicTitleToHeight/2 + 44) height:kMusicTitleToHeight bounds:CGRectMake(0, 0, DeviceWidth/2, kMusicTitleToHeight) fromFontSize:12 toFontSize:20 textAlignment:NSTextAlignmentCenter];
     CGFloat xOffset = kPlayTimeMarginXToCenter + CGRectGetWidth(self.currentPlayTime.frame)/2;
@@ -123,24 +123,24 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
 }
 
 - (void)stopPlay {
-    
-    NSLog(@"%lf",[(NSNumber *)[self.musicCover.layer valueForKeyPath:@"transform.rotation.z"] floatValue]);
-    [self coverAnimationWithPositionY:kCoverHeight/2 bounds:CGRectMake(0, 0, DeviceWidth, kCoverHeight) cornerRadius:0 keyValue:@"coverSuspendedAnimation"];
-//    [self.musicCover.layer convertTime:CACurrentMediaTime() fromLayer:nil];
-    [self coverRotatedToAngle:0 duration:0.3];
+//    NSLog(@"%lf",[(NSNumber *)[self.musicCover.layer valueForKeyPath:@"transform.rotation.z"] floatValue]);
+//    [self coverAnimationWithPositionY:kCoverHeight/2 bounds:CGRectMake(0, 0, DeviceWidth, kCoverHeight) cornerRadius:0 keyValue:@"coverSuspendedAnimation"];
+////    [self.musicCover.layer convertTime:CACurrentMediaTime() fromLayer:nil];
+//    [self coverRotatedToAngle:0 duration:0.3];
+    [self hideCoverWhenStop];
     [self playBarOpacityAnimationWithStatus:show];
     [self musicTitleAnimationWithPosition:CGPointMake(DeviceWidth/4 + 20, CGRectGetMinY(self.playBar.frame) + kMusicTitleFromHeight/2) height:kMusicTitleFromHeight bounds:CGRectMake(0, 0, DeviceWidth/2, kMusicTitleFromHeight) fromFontSize:20 toFontSize:12 textAlignment:NSTextAlignmentLeft];
     [self playTimeLabel:self.currentPlayTime addAnimationWithPosition:self.currentPlayTime.layer.position];
     [self playTimeLabel:self.musicPlayTime addAnimationWithPosition:self.musicPlayTime.layer.position];
     UIBezierPath *path = [UIBezierPath bezierPathWithRect:CGRectMake(CGRectGetMaxX(self.currentPlayTime.frame) + 10, CGRectGetMaxY(self.musicTitle.frame) + kPlayTimeHeight/2, DeviceWidth/2, 1)];
     [self progressAnimationWithPath:path];
-    self.playProgress.fillColor = [UIColor lightGrayColor].CGColor;//[UIColor colorWithRed:255.0/255.0 green:80.0/255.0 blue:80.0/255.0 alpha:1].CGColor;
+    self.playProgress.fillColor = [UIColor clearColor].CGColor;
     self.playProgress.strokeColor = [UIColor lightGrayColor].CGColor;
     [self playButtonAnimationToCenter:CGPointMake(DeviceWidth - kPlayButtonWidth/2 - 15, CGRectGetMaxY(self.playBar.frame))];
 }
 
 #pragma mark - Cover Animation
-- (void)coverAnimationWithPositionY:(CGFloat)positionY bounds:(CGRect)bounds cornerRadius:(CGFloat)cornerRadius keyValue:(NSString *)value {
+- (void)coverAnimationWithPositionY:(CGFloat)positionY bounds:(CGRect)bounds cornerRadius:(CGFloat)cornerRadius keyValue:(NSString *)value duration:(CGFloat)duration {
     CABasicAnimation *positionDownAni = [CABasicAnimation animationWithKeyPath:@"position.y"];
     positionDownAni.toValue = @(positionY);
     
@@ -155,23 +155,33 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
     group.delegate = self;
     [group setValue:value forKey:@"ani"];
     
-    [self.musicCover.layer gc_addAnimation:group forKey:nil];
+    [self.musicCover.layer gc_addAnimation:group forKey:nil withDuration:duration];
 }
 
 - (void)coverRotatedToAngle:(CGFloat)angle duration:(CGFloat)duration {
     CABasicAnimation *rotateAni = [CABasicAnimation animationWithKeyPath:@"transform.rotation.z"];
     rotateAni.toValue = @(angle);
-    if (angle == M_PI*2) {
-        rotateAni.delegate = self;
-        [rotateAni setValue:@"coverRotated" forKey:@"ani"];
-    } else if (angle != 0) {
-        rotateAni.repeatCount = HUGE_VALF;
-        
-    }
+    rotateAni.repeatCount = HUGE_VALF;
     rotateAni.beginTime = 0;
     rotateAni.duration = duration;
     
-    [self.musicCover.layer addAnimation:rotateAni forKey:nil];
+    [self.musicCover.layer addAnimation:rotateAni forKey:@"rotateAni"];
+}
+
+- (void)hideCoverWhenStop {
+    CABasicAnimation *opacityAni = [CABasicAnimation animationWithKeyPath:@"opacity"];
+    opacityAni.toValue = @(0);
+    opacityAni.delegate = self;
+    [opacityAni setValue:@"stopCoverAniamtion" forKey:@"ani"];
+    [self.musicCover.layer gc_addAnimation:opacityAni forKey:nil withDuration:0.15];
+}
+
+- (void)showCover {
+    CABasicAnimation *opacityAni = [CABasicAnimation animationWithKeyPath:@"opacity"];
+    opacityAni.toValue = @(1);
+    opacityAni.delegate = self;
+    [opacityAni setValue:@"showCover" forKey:@"ani"];
+    [self.musicCover.layer gc_addAnimation:opacityAni forKey:nil];
 }
 
 #pragma mark - Play Bar Aniamtion
@@ -235,13 +245,12 @@ typedef NS_ENUM(NSUInteger, playBarStatus) {
     NSString *ani = [animation valueForKey:@"ani"];
     if ([ani isEqualToString:@"coverPlayAnimation"]) {
         [self coverRotatedToAngle:M_PI*2 duration:5];
+    }  else if ([ani isEqualToString:@"stopCoverAniamtion"]) {
+        [self.musicCover.layer removeAnimationForKey:@"rotateAni"];
+        [self coverAnimationWithPositionY:kCoverHeight/2 bounds:CGRectMake(0, 0, DeviceWidth, kCoverHeight) cornerRadius:0 keyValue:@"coverSuspendedAnimation" duration:0.15];
     } else if ([ani isEqualToString:@"coverSuspendedAnimation"]) {
-//        [self.musicCover.layer removeAllAnimations];
-//        self.musicCover.layer.transform = CATransform3DIdentity;
-//        [self coverRotatedToAngle:0 duration:0.3];
-        [self.musicCover.layer removeAllAnimations];
-    } else if ([ani isEqualToString:@"coverRotated"]) {
-        
+        [self showCover];
+    } else if ([ani isEqualToString:@"showCover"]) {
         [self.musicCover.layer removeAllAnimations];
     }
 }
